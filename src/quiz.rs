@@ -19,6 +19,17 @@ pub struct Answer {
 }
 
 impl Quiz {
+
+    pub fn randomize_quiz(&mut self) {
+        self.current_question = 0;
+        randomize_vec(&mut self.questions);
+        self.questions.iter_mut()
+            .for_each(|q| {
+                randomize_vec(&mut q.answers);
+                q.answers.iter_mut().for_each(|a| a.checked = false)
+            });
+    }
+
     pub fn number_of_correctly_answered_questions(&self) -> usize {
         self.questions.iter()
             .filter(|q| q.is_answered_correct())
@@ -106,6 +117,10 @@ impl Question {
         }
     }
 
+    pub fn randomize(&mut self) {
+        
+    }
+
     pub fn is_answered_correct(&self) -> bool {
         self.answers.iter().all(|a| a.is_answered_correct())
     }
@@ -115,4 +130,17 @@ impl Answer {
     pub fn is_answered_correct(&self) -> bool {
         self.checked == self.is_answer_correct
     }
+}
+
+fn randomize_vec<T>(vec: &mut Vec<T>) {
+
+    let mut tmp = Vec::new();
+
+
+    while !vec.is_empty() {
+        let index = rand::random::<usize>() % vec.len();
+        tmp.push(vec.remove(index));
+    }
+
+    *vec = tmp;
 }
