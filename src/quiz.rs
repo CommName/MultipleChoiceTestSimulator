@@ -3,7 +3,6 @@ use std::vec;
 
 pub struct Quiz {
     questions: Vec<Question>,
-    name_of_quize: String,
     current_question: usize
 }
 
@@ -70,7 +69,6 @@ impl Quiz {
 
     pub fn dummy_test() -> Self {
         Self {
-            name_of_quize: "Dummy quize".to_string(),
             current_question: 0,
             questions: vec![
                 Question {
@@ -115,10 +113,6 @@ impl Question {
             true => 1.0,
             false => 0.0
         }
-    }
-
-    pub fn randomize(&mut self) {
-        
     }
 
     pub fn is_answered_correct(&self) -> bool {

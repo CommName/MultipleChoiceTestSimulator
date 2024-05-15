@@ -1,4 +1,3 @@
-use egui::{Color32, TextStyle, WidgetText};
 use quiz::Quiz;
 use egui::*;
 
@@ -7,7 +6,7 @@ mod quiz;
 
 fn main() {
     let native_options = eframe::NativeOptions::default();
-    eframe::run_native("My egui App", native_options, Box::new(|cc| Box::new(QuizApp::new(cc))));
+    let _ = eframe::run_native("My egui App", native_options, Box::new(|cc| Box::new(QuizApp::new(cc))));
 }
 
 struct  QuizApp {
@@ -16,7 +15,7 @@ struct  QuizApp {
 }
 
 impl QuizApp {
-    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         // Customize egui here with cc.egui_ctx.set_fonts and cc.egui_ctx.set_visuals.
         // Restore app state using cc.storage (requires the "persistence" feature).
         // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
@@ -25,10 +24,6 @@ impl QuizApp {
             quiz: Quiz::dummy_test(),
             answered: false
         }
-    }
-
-    pub fn randomize_quiz(&mut self) {
-        self.quiz.randomize_quiz();
     }
 }
 
