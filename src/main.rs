@@ -1,8 +1,8 @@
 use egui::{Color32, TextStyle, WidgetText};
-use test::Test;
+use quiz::Quiz;
 use egui::*;
 
-mod test;
+mod quiz;
 
 
 fn main() {
@@ -11,7 +11,7 @@ fn main() {
 }
 
 struct MyEguiApp {
-    quiz: Test,
+    quiz: Quiz,
     answered: bool
 }
 
@@ -22,7 +22,7 @@ impl MyEguiApp {
         // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
         // for e.g. egui::PaintCallback.
         Self { 
-            quiz: Test::dummy_test(),
+            quiz: Quiz::dummy_test(),
             answered: false
         }
     }

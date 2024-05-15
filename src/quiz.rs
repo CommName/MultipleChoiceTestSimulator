@@ -1,7 +1,7 @@
 use std::vec;
 
 
-pub struct Test {
+pub struct Quiz {
     questions: Vec<Question>,
     name_of_quize: String,
     current_question: usize
@@ -18,7 +18,7 @@ pub struct Answer {
     pub checked: bool
 }
 
-impl Test {
+impl Quiz {
     pub fn number_of_correctly_answered_questions(&self) -> usize {
         self.questions.iter()
             .filter(|q| q.is_answered_correct())
