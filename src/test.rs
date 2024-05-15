@@ -14,7 +14,7 @@ pub struct Question {
 
 pub struct Answer {
     pub answer: String,
-    is_answer_correct: bool,
+    pub is_answer_correct: bool,
     pub checked: bool
 }
 

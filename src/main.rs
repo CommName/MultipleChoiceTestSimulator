@@ -1,4 +1,6 @@
+use egui::{Color32, TextStyle, WidgetText};
 use test::Test;
+use egui::*;
 
 mod test;
 
@@ -9,7 +11,8 @@ fn main() {
 }
 
 struct MyEguiApp {
-    quiz: Test
+    quiz: Test,
+    answered: bool
 }
 
 impl MyEguiApp {
@@ -18,7 +21,10 @@ impl MyEguiApp {
         // Restore app state using cc.storage (requires the "persistence" feature).
         // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
         // for e.g. egui::PaintCallback.
-        Self { quiz: Test::dummy_test() }
+        Self { 
+            quiz: Test::dummy_test(),
+            answered: false
+        }
     }
 }
 
@@ -27,11 +33,19 @@ impl eframe::App for MyEguiApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let question = self.quiz.question();
+            ui.set_enabled(!self.answered);
 
             ui.heading(&question.question);
 
             for answer in question.answers.iter_mut() {
-                ui.checkbox(&mut answer.checked, &answer.answer);
+                let text_color = if self.answered && !answer.is_answered_correct() && answer.checked {
+                    Color32::from_rgb(255, 0, 0)
+                } else if self.answered && answer.checked {
+                    Color32::from_rgb(0, 255, 0)   
+                }else {
+                    Color32::from_rgb(120, 120, 120)
+                };
+                ui.checkbox(&mut answer.checked, RichText::new(&answer.answer).color(text_color));
             }
         });
 
@@ -39,10 +53,14 @@ impl eframe::App for MyEguiApp {
             ui.horizontal(|ui| {
                 let prev_button = egui::Button::new("<<<<");
                 if ui.add_enabled(
-                    self.quiz.is_there_prev_question(), 
+                    self.quiz.is_there_prev_question() || self.answered, 
                     prev_button
                 ).clicked() {
-                    self.quiz.prev_question();
+                    if self.answered {
+                        self.answered = false;
+                    } else {
+                        self.quiz.prev_question();
+                    }
                 };
 
                 ui.label(format!("{question_number} / {total_number_of_questions}",
@@ -50,18 +68,14 @@ impl eframe::App for MyEguiApp {
                     total_number_of_questions = self.quiz.number_of_questions()));
                 
                 let next_button = egui::Button::new(">>>>");
-                 if ui.add_enabled(
-                    self.quiz.is_there_next_question(), 
-                    next_button)
+                 if ui.add(next_button)
                     .clicked() {
-                    self.quiz.next_question();
+                        if self.answered {
+                            self.quiz.next_question();
+                        }
+                        self.answered = !self.answered;
                  }
 
-                 if !self.quiz.is_there_next_question() {
-                    if ui.button("Finsih").clicked() {
-                        
-                    }
-                 }
             })
 
 
