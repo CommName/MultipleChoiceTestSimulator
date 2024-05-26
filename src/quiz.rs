@@ -6,11 +6,13 @@ pub struct Quiz {
     current_question: usize
 }
 
+#[derive(Default)]
 pub struct Question {
     pub question: String,
     pub answers: Vec<Answer>
 }
 
+#[derive(Default)]
 pub struct Answer {
     pub answer: String,
     pub is_answer_correct: bool,
@@ -64,6 +66,19 @@ impl Quiz {
     pub fn prev_question(&mut self) {
         if self.is_there_prev_question() {
             self.current_question -= 1;
+        }
+    }
+
+    pub fn add_new_question(&mut self) {
+        self.questions.push(Default::default());
+    }
+
+    pub fn remove_current_question(&mut self) {
+        if self.questions.len() > 1 {
+            self.questions.remove(self.current_question);
+            if self.current_question != 0 {
+                self.current_question -= 1;
+            }
         }
     }
 

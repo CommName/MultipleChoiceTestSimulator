@@ -1,3 +1,5 @@
+
+use egui_extras::{Column, TableBuilder};
 use quiz::Quiz;
 use egui::*;
 
@@ -11,7 +13,13 @@ fn main() {
 
 struct  QuizApp {
     quiz: Quiz,
-    answered: bool
+    answered: bool,
+    view: QuizView
+}
+
+enum  QuizView {
+    Quiz,
+    Editor    
 }
 
 impl QuizApp {
@@ -22,13 +30,12 @@ impl QuizApp {
         // for e.g. egui::PaintCallback.
         Self { 
             quiz: Quiz::dummy_test(),
-            answered: false
+            answered: false,
+            view: QuizView::Quiz
         }
     }
-}
 
-impl eframe::App for QuizApp {
-   fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn draw_quiz_view(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let question = self.quiz.question();
@@ -91,10 +98,115 @@ impl eframe::App for QuizApp {
                     self.answered = false;
                 }
 
+                if ui.button("Eddit quiz").clicked() {
+                    self.view = QuizView::Editor
+                }
+
 
             })
 
 
         });
+    }
+
+    fn draw_editor_view(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.vertical(|ui| {
+                ui.heading(format!("Question editor ({question_number} / {number_of_questions})", 
+                    question_number=self.quiz.current_question_number() + 1,
+                    number_of_questions=self.quiz.number_of_questions()));
+
+                let question = self.quiz.question();
+
+                ui.horizontal(|ui| {
+                    ui.strong("Question:");
+                    ui.text_edit_singleline(&mut question.question);
+                });
+
+                TableBuilder::new(ui)
+                    .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
+                    .column(Column::remainder())
+                    .column(Column::auto())
+                    .column(Column::auto())
+                    .striped(true)
+                    .resizable(true)
+                    .header(20.0, |mut header| {
+                        header.col(|ui| {
+                            ui.strong("Answer");
+                        });
+                        header.col(|ui| {
+                            ui.strong("Corret");
+                        });
+                        header.col(|ui|{
+                            ui.strong("Actions");
+                        });
+
+                    })
+                    .body(|mut body| {
+                        let mut index_to_delete = None;
+                        for (index, answer) in question.answers.iter_mut().enumerate() {
+                            body.row(30.0, |mut row| {
+                                row.col(|ui| {
+                                    ui.text_edit_singleline(&mut answer.answer);
+                                });
+                                row.col(|ui| {
+                                    ui.checkbox(&mut answer.is_answer_correct, "");
+                                });
+
+                                row.col(|ui| {
+                                    if ui.button("Remove").clicked() {
+                                        let _ = index_to_delete.insert(index);
+                                    }
+                                });
+                            })
+                        }
+                        if let Some(index) = index_to_delete {
+                            question.answers.remove(index);
+                        }
+                });
+                
+                if ui.button("Add answer").clicked() {
+                    question.answers.push(Default::default());
+                }
+            });
+        });
+
+        egui::TopBottomPanel::bottom("Editor naviagtion bar").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+
+                if ui.button("Back").clicked() {
+                    self.view = QuizView::Quiz
+                }
+                
+                if ui.button("New").clicked() {
+                    self.quiz.add_new_question();
+                    while self.quiz.is_there_next_question() {
+                        self.quiz.next_question();
+                    }
+                }
+
+                if ui.button("Remove current").clicked() {
+                    self.quiz.remove_current_question();
+                }
+
+                if ui.button("Next").clicked() {
+                    self.quiz.next_question();
+                }
+
+                if ui.button("Prev").clicked() {
+                    self.quiz.prev_question();
+                }
+            });
+        });
+    }
+}
+
+impl eframe::App for QuizApp {
+   fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        match self.view {
+            QuizView::Quiz => self.draw_quiz_view(ctx, frame),
+            QuizView::Editor => self.draw_editor_view(ctx, frame)
+        }
    }
 }
