@@ -14,12 +14,20 @@ fn main() {
 struct  QuizApp {
     quiz: Quiz,
     answered: bool,
-    view: QuizView
+    view: QuizView,
+    quiz_json: Option<QuizJsonEditor>
+}
+
+#[derive(Default)]
+struct QuizJsonEditor {
+    error: Option<String>,
+    quiz_json: String
 }
 
 enum  QuizView {
     Quiz,
-    Editor    
+    Editor,
+    EditorJson    
 }
 
 impl QuizApp {
@@ -31,11 +39,12 @@ impl QuizApp {
         Self { 
             quiz: Quiz::dummy_test(),
             answered: false,
-            view: QuizView::Quiz
+            view: QuizView::Quiz,
+            quiz_json: Default::default(),
         }
     }
 
-    fn draw_quiz_view(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn draw_quiz_view(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let question = self.quiz.question();
@@ -98,7 +107,7 @@ impl QuizApp {
                     self.answered = false;
                 }
 
-                if ui.button("Eddit quiz").clicked() {
+                if ui.button("Edit quiz").clicked() {
                     self.view = QuizView::Editor
                 }
 
@@ -109,7 +118,7 @@ impl QuizApp {
         });
     }
 
-    fn draw_editor_view(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn draw_editor_view(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
@@ -197,6 +206,57 @@ impl QuizApp {
                 if ui.button("Prev").clicked() {
                     self.quiz.prev_question();
                 }
+
+                if ui.button("Edit json").clicked() {
+                    self.view = QuizView::EditorJson;
+                }
+            });
+        });
+    }
+
+    fn draw_editor_json_view(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        if self.quiz_json.is_none() {
+            let _ = self.quiz_json.insert(QuizJsonEditor {
+                error: None,
+                quiz_json: serde_json::to_string_pretty(&self.quiz).unwrap()
+            });
+        }
+        egui::CentralPanel::default().show(ctx, |ui| {
+            if let Some(ref mut quiz_json) = self.quiz_json {
+                if let Some(ref error) = quiz_json.error {
+                    ui.label(RichText::new(error).color(Rgba::RED));
+                }
+
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    ui.add(
+                        egui::TextEdit::multiline(&mut quiz_json.quiz_json)
+                        .desired_width(f32::INFINITY)
+                    );
+                });
+            }
+        });
+        egui::TopBottomPanel::bottom("Editor json navigator bar").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                if ui.button("Cancel").clicked() {
+                    let _ = self.quiz_json.take();
+                    self.view = QuizView::Editor;
+                }
+    
+                if ui.button("Save").clicked() {
+                    if let Some(ref mut quiz_json) = self.quiz_json {
+                        match serde_json::from_str::<Quiz>(&quiz_json.quiz_json) {
+                            Ok(quiz) => {
+                                self.quiz = quiz;
+                                let _ = self.quiz_json.take();
+                                self.view = QuizView::Editor;
+    
+                            }, 
+                            Err(e) => {
+                                quiz_json.error = Some(format!("{e}"));
+                            }
+                        }
+                    }
+                }
             });
         });
     }
@@ -206,7 +266,8 @@ impl eframe::App for QuizApp {
    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         match self.view {
             QuizView::Quiz => self.draw_quiz_view(ctx, frame),
-            QuizView::Editor => self.draw_editor_view(ctx, frame)
+            QuizView::Editor => self.draw_editor_view(ctx, frame),
+            QuizView::EditorJson => self.draw_editor_json_view(ctx, frame)
         }
    }
 }

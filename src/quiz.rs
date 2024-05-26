@@ -1,18 +1,20 @@
 use std::vec;
 
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Quiz {
     questions: Vec<Question>,
     current_question: usize
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct Question {
     pub question: String,
     pub answers: Vec<Answer>
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct Answer {
     pub answer: String,
     pub is_answer_correct: bool,
