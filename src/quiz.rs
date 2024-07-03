@@ -149,6 +149,7 @@ fn randomize_vec<T>(vec: &mut Vec<T>) {
 
 
     while !vec.is_empty() {
+        // #[cfg(not(target_arch = "wasm32"))]
         let index = rand::random::<usize>() % vec.len();
         tmp.push(vec.remove(index));
     }
