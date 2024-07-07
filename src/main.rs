@@ -5,6 +5,7 @@ use quiz::Quiz;
 
 mod quiz;
 mod quiz_view;
+mod quiz_loader;
 
 use quiz_view::QuizApp;
 
@@ -22,12 +23,17 @@ fn main() {
 
 #[cfg(target_arch = "wasm32")]
 fn main() {
+    use quiz_loader::QuizLoader;
+
 
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
     let web_options = eframe::WebOptions::default();
-    let quiz = Quiz::dummy_test();
+//let quiz  = Quiz::dummy_test();
 
-    wasm_bindgen_futures::spawn_local(async {
+wasm_bindgen_futures::spawn_local(async {
+        let quiz = QuizLoader::fetch_async("./test.json")
+            .await
+            .unwrap();
         let start_result = eframe::WebRunner::new()
             .start(
                 "quiz_app", // hardcode it
