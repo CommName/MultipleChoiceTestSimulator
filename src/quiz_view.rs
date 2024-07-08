@@ -1,4 +1,4 @@
-use crate::Quiz;
+use crate::quiz::Quiz;
 use egui_extras::{Column, TableBuilder};
 use egui::*;
 
