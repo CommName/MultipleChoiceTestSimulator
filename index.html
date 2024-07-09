@@ -1,10 +1,18 @@
 <html>
   <head>
+    <link rel="preload" href="./pkg/MultipleChoiceTestSimulatorLib_bg.wasm" crossorigin=anonymous as="fetch" type="application/wasm"></head>
+    <link rel="modulepreload" href="./pkg/MultipleChoiceTestSimulatorLib.js" crossorigin=anonymous>
   </head>
   <body>
     
     <!-- The WASM code will resize the canvas dynamically -->
     <!-- the id is hardcoded in main.rs . so, make sure both match. -->
     <canvas id="quiz_app"></canvas>
+      
+    <script type="module">
+      import init, * as bindings from './pkg/MultipleChoiceTestSimulatorLib.js';
+      const wasm = await init('./pkg/MultipleChoiceTestSimulatorLib_bg.wasm');
+      wasm.start_quiz();
+    </script>
   </body>
 </html>
