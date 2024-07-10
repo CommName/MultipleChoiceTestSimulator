@@ -1,0 +1,35 @@
+{
+    "questions": [
+      {
+        "question": "Question 1",
+        "answers": [
+          {
+            "answer": "Answer 1",
+            "is_answer_correct": false,
+            "checked": false
+          },
+          {
+            "answer": "Answer 2",
+            "is_answer_correct": true,
+            "checked": false
+          }
+        ]
+      },
+      {
+        "question": "Question 2",
+        "answers": [
+          {
+            "answer": "Answer 1",
+            "is_answer_correct": true,
+            "checked": false
+          },
+          {
+            "answer": "Answer 2",
+            "is_answer_correct": false,
+            "checked": false
+          }
+        ]
+      }
+    ],
+    "current_question": 0
+  }

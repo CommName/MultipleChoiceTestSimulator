@@ -5,7 +5,7 @@ use egui::*;
 #[derive(Default)]
 struct QuizJsonEditor {
     error: Option<String>,
-    quiz_json: String
+    quiz_json: String,
 }
 
 enum  QuizView {
@@ -19,6 +19,7 @@ pub struct  QuizApp {
     quiz: Quiz,
     answered: bool,
     view: QuizView,
+    enable_editor: bool,
     quiz_json: Option<QuizJsonEditor>
 }
 
@@ -33,7 +34,15 @@ impl QuizApp {
             quiz,
             answered: false,
             view: QuizView::Quiz,
+            enable_editor: true,
             quiz_json: Default::default(),
+        }
+    }
+
+    pub fn enable_editor(self, enable_editor: bool) -> Self {
+        Self {
+            enable_editor,
+            ..self
         }
     }
 
@@ -100,8 +109,10 @@ impl QuizApp {
                     self.answered = false;
                 }
 
-                if ui.button("Edit quiz").clicked() {
-                    self.view = QuizView::Editor
+                if self.enable_editor {
+                    if ui.button("Edit quiz").clicked() {
+                        self.view = QuizView::Editor
+                    }
                 }
 
 

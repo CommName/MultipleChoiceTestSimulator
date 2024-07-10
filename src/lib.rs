@@ -12,18 +12,23 @@ mod wasm_lib {
     
     
     #[wasm_bindgen]
-    pub fn start_quiz() {
+    pub fn start_quiz(canves_id: String, quiz_url: String, disable_editor: bool) {
         eframe::WebLogger::init(log::LevelFilter::Debug).ok();
         let web_options = eframe::WebOptions::default();
         
         wasm_bindgen_futures::spawn_local(async move {    
-            let quiz = Quiz::dummy_test();
+            let quiz = QuizLoader::fetch_async(&quiz_url)
+                .await
+                .expect("Failed to fetch quiz");
         
             let start_result = eframe::WebRunner::new()
             .start(
-                "quiz_app", // hardcode it
+                &canves_id,
                 web_options,
-                Box::new(|cc| Box::new(QuizApp::new(cc, quiz))),
+                Box::new(move |cc| {
+                    Box::new(QuizApp::new(cc, quiz).enable_editor(!disable_editor))
+                } ),
+                    
             )
             .await;
     });

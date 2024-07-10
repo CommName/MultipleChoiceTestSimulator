@@ -12,7 +12,7 @@
     <script type="module">
       import init, * as bindings from './pkg/MultipleChoiceTestSimulatorLib.js';
       const wasm = await init('./pkg/MultipleChoiceTestSimulatorLib_bg.wasm');
-      bindings.start_quiz();
+      bindings.start_quiz("quiz_app", window.location.href + "/dummy_quiz.json", true);
     </script>
   </body>
 </html>
