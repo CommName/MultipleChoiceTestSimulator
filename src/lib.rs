@@ -2,6 +2,8 @@
 mod quiz_loader;
 mod quiz_view;
 mod quiz;
+mod lang;
+
 #[cfg(target_arch = "wasm32")]
 mod wasm_lib {
     use super::*;
