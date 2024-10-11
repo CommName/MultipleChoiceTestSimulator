@@ -7,6 +7,7 @@ use quiz::Quiz;
 mod quiz;
 mod quiz_view;
 mod quiz_loader;
+mod lang;
 
 use quiz_loader::QuizLoader;
 use quiz_view::QuizApp;

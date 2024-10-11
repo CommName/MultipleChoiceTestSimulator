@@ -1,4 +1,6 @@
 use crate::quiz::Quiz;
+use crate::lang::Labels;
+
 use egui_extras::{Column, TableBuilder};
 use egui::*;
 
@@ -20,7 +22,8 @@ pub struct  QuizApp {
     answered: bool,
     view: QuizView,
     enable_editor: bool,
-    quiz_json: Option<QuizJsonEditor>
+    quiz_json: Option<QuizJsonEditor>,
+    labels: Labels
 }
 
 
@@ -36,6 +39,7 @@ impl QuizApp {
             view: QuizView::Quiz,
             enable_editor: true,
             quiz_json: Default::default(),
+            labels: Default::default()
         }
     }
 
@@ -79,7 +83,7 @@ impl QuizApp {
 
         egui::TopBottomPanel::bottom("questions_move").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                let prev_button = egui::Button::new("<<<<");
+                let prev_button = egui::Button::new(&self.labels.prev_question_button);
                 if ui.add_enabled(
                     self.quiz.is_there_prev_question() || self.answered, 
                     prev_button
@@ -95,7 +99,7 @@ impl QuizApp {
                     question_number = self.quiz.current_question_number() + 1,
                     total_number_of_questions = self.quiz.number_of_questions()));
                 
-                let next_button = egui::Button::new(">>>>");
+                let next_button = egui::Button::new(&self.labels.next_question_button);
                 if ui.add(next_button)
                     .clicked() {
                     if self.answered {
@@ -104,17 +108,16 @@ impl QuizApp {
                     self.answered = !self.answered;
                 }
 
-                if ui.button("Restart quiz").clicked() {
+                if ui.button(&self.labels.restart_quiz_button).clicked() {
                     self.quiz.randomize_quiz();
                     self.answered = false;
                 }
 
                 if self.enable_editor {
-                    if ui.button("Edit quiz").clicked() {
+                    if ui.button(&self.labels.enter_quiz_editor_button).clicked() {
                         self.view = QuizView::Editor
                     }
                 }
-
 
             })
 
@@ -126,14 +129,15 @@ impl QuizApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical(|ui| {
-                ui.heading(format!("Question editor ({question_number} / {number_of_questions})", 
+                ui.heading(format!("{question_heading} ({question_number} / {number_of_questions})",
+                    question_heading=self.labels.question_heading_editor, 
                     question_number=self.quiz.current_question_number() + 1,
                     number_of_questions=self.quiz.number_of_questions()));
 
                 let question = self.quiz.question();
 
                 ui.horizontal(|ui| {
-                    ui.strong("Question:");
+                    ui.strong(&self.labels.question_label_editor);
                     ui.text_edit_singleline(&mut question.question);
                 });
 
@@ -146,13 +150,13 @@ impl QuizApp {
                     .resizable(true)
                     .header(20.0, |mut header| {
                         header.col(|ui| {
-                            ui.strong("Answer");
+                            ui.strong(&self.labels.answer_col_heading_editor);
                         });
                         header.col(|ui| {
-                            ui.strong("Corret");
+                            ui.strong(&self.labels.correct_answers_col_heading_editor);
                         });
                         header.col(|ui|{
-                            ui.strong("Actions");
+                            ui.strong(&self.labels.actions_col_heading_editor);
                         });
 
                     })
@@ -168,7 +172,7 @@ impl QuizApp {
                                 });
 
                                 row.col(|ui| {
-                                    if ui.button("Remove").clicked() {
+                                    if ui.button(&self.labels.remove_answer_button_editor).clicked() {
                                         let _ = index_to_delete.insert(index);
                                     }
                                 });
@@ -179,7 +183,7 @@ impl QuizApp {
                         }
                 });
                 
-                if ui.button("Add answer").clicked() {
+                if ui.button(&self.labels.add_answer_button_editor).clicked() {
                     question.answers.push(Default::default());
                 }
             });
@@ -188,30 +192,30 @@ impl QuizApp {
         egui::TopBottomPanel::bottom("Editor naviagtion bar").show(ctx, |ui| {
             ui.horizontal(|ui| {
 
-                if ui.button("Back").clicked() {
+                if ui.button(&self.labels.exit_quiz_editor_button).clicked() {
                     self.view = QuizView::Quiz
                 }
                 
-                if ui.button("New").clicked() {
+                if ui.button(&self.labels.new_question_button).clicked() {
                     self.quiz.add_new_question();
                     while self.quiz.is_there_next_question() {
                         self.quiz.next_question();
                     }
                 }
 
-                if ui.button("Remove current").clicked() {
+                if ui.button(&self.labels.remove_qustion_button).clicked() {
                     self.quiz.remove_current_question();
                 }
 
-                if ui.button("Next").clicked() {
+                if ui.button(&self.labels.next_question_button).clicked() {
                     self.quiz.next_question();
                 }
 
-                if ui.button("Prev").clicked() {
+                if ui.button(&self.labels.prev_question_button).clicked() {
                     self.quiz.prev_question();
                 }
 
-                if ui.button("Edit json").clicked() {
+                if ui.button(&self.labels.enter_json_quiz_edditor_button).clicked() {
                     self.view = QuizView::EditorJson;
                 }
             });
@@ -241,12 +245,12 @@ impl QuizApp {
         });
         egui::TopBottomPanel::bottom("Editor json navigator bar").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                if ui.button("Cancel").clicked() {
+                if ui.button(&self.labels.cancel_button).clicked() {
                     let _ = self.quiz_json.take();
                     self.view = QuizView::Editor;
                 }
     
-                if ui.button("Save").clicked() {
+                if ui.button(&self.labels.save_button).clicked() {
                     if let Some(ref mut quiz_json) = self.quiz_json {
                         match serde_json::from_str::<Quiz>(&quiz_json.quiz_json) {
                             Ok(quiz) => {
